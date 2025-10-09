@@ -1,0 +1,29 @@
+{{- $env := .Values.env | default "home" -}}
+{{- range $name, $proj := .Values.projects }}
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ $name }}
+  namespace: argocd
+spec:
+  description: {{ $proj.description | default (printf "Project %s (%s)" $name $env) }}
+  sourceRepos:
+{{- if $proj.sources }}
+{{- range $proj.sources }}
+    - {{ .repoURL | default . }}
+{{- end }}
+{{- else }}
+    - '*'
+{{- end }}
+  destinations:
+{{- if $proj.destinations }}
+{{- range $proj.destinations }}
+    - namespace: {{ .namespace | default "*" }}
+      server: {{ .server | default "https://kubernetes.default.svc" }}
+{{- end }}
+{{- else }}
+    - namespace: "*"
+      server: https://kubernetes.default.svc
+{{- end }}
+---
+{{- end }}
