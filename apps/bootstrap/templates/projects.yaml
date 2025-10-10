@@ -10,7 +10,11 @@ spec:
   sourceRepos:
 {{- if $proj.sources }}
 {{- range $proj.sources }}
-    - {{ .repoURL | default . }}
+{{- if typeIs "string" . }}
+    - {{ . }}
+{{- else }}
+    - {{ .repoURL }}
+{{- end }}
 {{- end }}
 {{- else }}
     - '*'
