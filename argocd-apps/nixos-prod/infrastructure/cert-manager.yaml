@@ -33,7 +33,7 @@ spec:
     metadata:
       labels:
         argocdCluster: '{{values.clusterName}}'
-        cluster: '{{values.cluster}}'
+        cluster: '{{values.clusterName}}'
         environment: '{{values.environment}}'
       name: '{{values.clusterName}}-{{path.basenameNormalized}}'
       namespace: argocd
@@ -47,7 +47,7 @@ spec:
         plugin:
           env:
           - name: CLUSTER
-            value: '{{values.cluster}}'
+            value: '{{values.clusterName}}'
           - name: ENVIRONMENT
             value: '{{values.environment}}'
           - name: DOMAIN
