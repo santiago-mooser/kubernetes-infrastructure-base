@@ -1,0 +1,121 @@
+argocd:
+  namespace: argocd
+  releaseName: argocd
+
+argo-cd:
+  redis-ha:
+    enabled: false
+
+  controller:
+    metrics:
+      enabled: true
+      applicationLabels:
+        enabled: true
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          prometheus: nixos
+    replicas: 3
+    enableStatefulSet: true
+    args:
+      statusProcessors: 50
+      operationProcessors: 25
+
+  applicationSet:
+    replicas: 3
+    metrics:
+      enabled: true
+      applicationLabels:
+        enabled: true
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          prometheus: nixos
+
+  server:
+    metrics:
+      enabled: true
+      applicationLabels:
+        enabled: true
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          prometheus: nixos
+    autoscaling:
+      enabled: true
+      minReplicas: 3
+    ingress:
+      enabled: true
+      ingressClassName: nginx-internal
+      # Do not define tls certifcation, use default from nginx ingress
+      annotations:
+        annotations.nginx.org/redirect-to-https: true
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      hosts:
+        - argocd.nixos.tech.santiago-mooser.com
+    extraArgs:
+      # Handle TLS on ingress level
+      - --insecure
+    # Access control for user "developer"
+
+    config:
+      exec.enabled: "true"
+      ## Plugin: helm-envsubst
+      ##
+      ## Command:
+      ##   - argocd-helm-envsubst-plugin build
+      ## Flag:
+      ##   - helm-registry-secret-config-path: "repositories.yaml" created by Terraform with gitlab helm resigtry credentials
+      ##
+      ## Command:
+      ##   - argocd-helm-envsubst-plugin render
+      ## Flag:
+      ##   - log-location: location for writing debug log
+      configManagementPlugins: |
+        - name: helm-envsubst
+          init:
+            command: ["sh", "-c"]
+            args: ["argocd-helm-envsubst-plugin build --helm-registry-secret-config-path /helm-working-dir/plugin-repositories/repositories.yaml"]
+          generate:
+            command: ["sh", "-c"]
+            args: ["argocd-helm-envsubst-plugin render --log-location /tmp/argocd-helm-envsubst-plugin/"]
+
+      url: https://argocd.nixos.tech.santiago-mooser.com
+
+
+  configs:
+    kustomize.buildOptions: --enable-alpha-plugins
+    params:
+      server.insecure: true
+      reposerver.parallelism.limit: 20
+
+    cm:
+      server.profile.enabled: 'true'
+      controller.profile.enabled: 'true'
+      exec.enabled: "true"
+      timeout.reconciliation: 0s
+      resource:
+        ignoreResourceUpdatesEnabled: 'false'
+        exclusions: |
+          - apiGroups:
+              - cilium.io
+            kinds:
+              - CiliumIdentity
+            clusters:
+              - "*"
+        customizations:
+          ignoreResourceUpdates.all: |
+            jsonPointers:
+              - /status
+          ignoreResourceUpdates.Pod: |
+            jsonPointers:
+              - /status
+          ignoreResourceUpdates.batch_Job: |
+            jsonPointers:
+              - /status
+          networking.k8s.io/Ingress:
+            health.lua: |
+              hs = {}
+              hs.status = "Healthy"
+              return hs

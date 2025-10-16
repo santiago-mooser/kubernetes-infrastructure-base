@@ -1,0 +1,23 @@
+{{ if and (.Values.dragonflyRedis) (hasKey .Values "argo-cd" | and (index .Values "argo-cd").externalRedis) }}
+apiVersion: dragonflydb.io/v1alpha1
+kind: Dragonfly
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1" # Sync this template first
+  labels:
+    app.kubernetes.io/name: dragonfly-redis-argocd
+    app.kubernetes.io/part-of: dragonfly-operator
+    app.kubernetes.io/created-by: dragonfly-operator
+    env: {{ .Values.env }}
+  name: dragonfly-redis-argocd
+  namespace: argocd
+spec:
+  replicas: {{ .Values.dragonflyRedis.spec.replicas }}
+  resources:
+    requests:
+      cpu: {{ .Values.dragonflyRedis.spec.resources.requests.cpu }}
+      memory: {{ .Values.dragonflyRedis.spec.resources.requests.memory }}
+    limits:
+      cpu: {{ .Values.dragonflyRedis.spec.resources.limits.cpu }}
+      memory: {{ .Values.dragonflyRedis.spec.resources.limits.memory }}
+  {{ end }}

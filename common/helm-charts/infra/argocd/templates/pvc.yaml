@@ -1,0 +1,31 @@
+{{- if (hasKey .Values "argo-cd" | and (index .Values "argo-cd").repoServer.persistence) }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-repo-server
+  namespace: {{ include  "argo-cd.namespace" . }}
+  {{- with (mergeOverwrite (deepCopy (index .Values "argo-cd").global.deploymentAnnotations) (index .Values "argo-cd").repoServer.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  labels:
+    app.kubernetes.io/component: repo-server
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Release.Name }}-repo-server
+    app.kubernetes.io/part-of: argocd
+spec:
+  accessModes:
+    - {{ (index .Values "argo-cd").repoServer.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ (index .Values "argo-cd").repoServer.persistence.size | quote }}
+{{- if (index .Values "argo-cd").repoServer.persistence.storageClass }}
+{{- if (eq "-" (index .Values "argo-cd").repoServer.persistence.storageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ (index .Values "argo-cd").repoServer.persistence.storageClass }}"
+{{- end }}
+{{- end }}
+{{- end }}
