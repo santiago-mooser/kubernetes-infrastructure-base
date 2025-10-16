@@ -1,0 +1,12 @@
+---
+apiVersion: v2
+description: A chart to power Immich (immich.app) running on kubernetes
+name: immich
+version: 0.10.0
+appVersion: v2.0.0
+sources:
+  - https://github.com/immich-app/immich
+dependencies:
+  - name: immich
+    repository: https://immich-app.github.io/immich-charts
+    version: 0.10.0

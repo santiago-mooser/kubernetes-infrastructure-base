@@ -1,17 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nixos-prod-infrastructure-root
+  name: nixos-infra-base-root
   namespace: argocd
 spec:
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
   project: app-of-app-of-appsets
   source:
-    path: argocd-apps/infrastructure
+    path: argocd-apps/nixos-prod/root
     repoURL: https://github.com/santiago-mooser/kubernetes-infrastructure-base
     targetRevision: HEAD
     directory:
       recurse: true
-  syncPolicy: {}
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true

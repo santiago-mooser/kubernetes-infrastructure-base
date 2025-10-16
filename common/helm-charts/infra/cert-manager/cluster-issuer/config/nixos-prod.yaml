@@ -1,0 +1,21 @@
+clusterIssuer:
+  letsencrypt-dns01:
+    name: letsencrypt-dns01-${ARGOCD_ENV_DOMAIN}
+    spec:
+      acme:
+        email: contact@santiago-mooser.com
+        server: https://acme-v02.api.letsencrypt.org/directory
+        preferredChain: "ISRG Root X1"
+        privateKeySecretRef:
+          name: letsencrypt-dns01-${ARGOCD_ENV_DOMAIN}
+        solvers:
+          - dns01:
+              cloudflare:
+                email: cloudflare@santiago-mooser.com
+                apiTokenSecretRef:
+                  name: cloudflare-api-token-secret
+                  key: api-token
+            selector:
+              dnsZones:
+                - "nixos.santiago-mooser.com"
+  letsencrypt-http01: null

@@ -1,0 +1,18 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+apiVersion: v2
+name: vault
+version: 0.31.0
+appVersion: 1.20.4
+kubeVersion: ">= 1.20.0-0"
+description: Official HashiCorp Vault Chart
+sources:
+  - https://github.com/hashicorp/vault
+  - https://github.com/hashicorp/vault-helm
+  - https://github.com/hashicorp/vault-k8s
+  - https://github.com/hashicorp/vault-csi-provider
+dependencies:
+  - name: vault
+    repository: https://helm.releases.hashicorp.com
+    version: 0.31.0

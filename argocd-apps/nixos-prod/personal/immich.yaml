@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nixos-prod-personal-root
+  name: immich
   namespace: argocd
 spec:
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
-  project: app-of-app-of-appsets
+    namespace: personal
+  project: app-of-appsets
   source:
-    path: argocd-apps/personal
-    repoURL: https://github.com/santiago-mooser/kubernetes-infrastructure-base
+    repoURL: https://github.com/santiago-mooser/kubernetes-infrastructure-base.git
     targetRevision: HEAD
+    path: common/helm-charts/personal/immich
     directory:
       recurse: true
   syncPolicy: {}
