@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: nixos-prod-argocd
+  namespace: argocd
+spec:
+  generators:
+  - matrix:
+      generators:
+      - list:
+          elements:
+          - cluster: nixos-infra-prod
+            url: https://kubernetes.default.svc
+            values:
+              cluster: nixos
+              clusterName: nixos-prod
+              environment: prod
+      - git:
+          directories:
+          - path: common/helm-charts/infra/argocd
+          repoURL: https://github.com/santiago-mooser/kubernetes-infrastructure-base.git
+          revision: HEAD
+  template:
+    metadata:
+      labels:
+        argocdCluster: '{{values.clusterName}}'
+        cluster: '{{values.cluster}}'
+        environment: '{{values.environment}}'
+      name: '{{values.clusterName}}-{{path.basenameNormalized}}'
+      namespace: argocd
+    spec:
+      destination:
+        namespace: argocd
+        server: https://kubernetes.default.svc
+      project: infrastructure-base
+      source:
+        path: '{{path}}'
+        plugin:
+          env:
+          - name: CLUSTER
+            value: '{{values.cluster}}'
+          - name: ENVIRONMENT
+            value: '{{values.environment}}'
+        repoURL: https://github.com/santiago-mooser/kubernetes-infrastructure-base.git
+        targetRevision: HEAD
+      syncPolicy: {}
