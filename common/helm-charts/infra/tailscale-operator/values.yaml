@@ -1,0 +1,84 @@
+argocd:
+  namespace: tailscale
+  releaseName: tailscale-operator
+
+tailscale-operator:
+  nameOverride: tailscale-operator
+  fullnameOverride: tailscale-operator
+
+  # OAuth credentials will be provided via ExternalSecret
+  oauth:
+    clientId: ""
+    clientSecret: ""
+
+  # Operator configuration
+  operatorConfig:
+    image:
+      repo: tailscale/k8s-operator
+      tag: v1.76.1
+
+    # Default hostname for ingress proxies
+    hostname: "${ARGOCD_ENV_CLUSTER}-k8s"
+
+    # Resources for the operator pod
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  # ProxyConfig defines default configuration for Tailscale proxies
+  proxyConfig:
+    # Default image for proxy pods
+    image:
+      repo: tailscale/tailscale
+      tag: v1.76.1
+
+    # Default resources for proxy pods
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  # API server proxy configuration (optional)
+  apiServerProxyConfig:
+    mode: "noauth"
+
+  # Default tags for devices created by the operator
+  defaultTags:
+    - "tag:k8s"
+
+# External Secret configuration
+# This will be created separately to pull OAuth credentials from your secrets manager
+externalSecret:
+  enabled: true
+  secretStore: "cluster-secret-store"  # Adjust based on your ExternalSecret setup
+  refreshInterval: "1h"
+  # The actual secret paths will be configured in config/nixos-prod.yaml
+
+# ProxyClass for ingress (optional - can be defined here or per-service)
+proxyClass:
+  enabled: true
+  name: tailscale-ingress
+  spec:
+    statefulSet:
+      labels:
+        app: tailscale-ingress
+        managed-by: tailscale-operator
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9001"
+
+    tailscale:
+      # Accept routes for ingress
+      acceptRoutes: false
+
+      # Tags to apply to ingress devices
+      tags:
+        - "tag:k8s"
+        - "tag:k8s-ingress"

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: tailscale-operator
+description: Tailscale Kubernetes Operator for secure remote access
+version: 1.0.0
+appVersion: v1.76.1
+dependencies:
+  - name: tailscale-operator
+    version: 1.76.1
+    repository: https://pkgs.tailscale.com/helmcharts

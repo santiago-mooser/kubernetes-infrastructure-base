@@ -1,0 +1,57 @@
+tailscale-operator:
+  operatorConfig:
+    hostname: "nixos-prod-k8s"
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  proxyConfig:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+# ExternalSecret configuration for OAuth credentials
+externalSecret:
+  enabled: true
+  secretStore: "cluster-secret-store"
+  refreshInterval: "1h"
+  # Configure these paths based on your secrets manager setup
+  # Example for AWS Secrets Manager, Vault, or similar
+  data:
+    - secretKey: client_id
+      remoteRef:
+        key: tailscale/oauth
+        property: client_id
+    - secretKey: client_secret
+      remoteRef:
+        key: tailscale/oauth
+        property: client_secret
+
+proxyClass:
+  enabled: true
+  name: tailscale-ingress
+  spec:
+    statefulSet:
+      labels:
+        app: tailscale-ingress
+        cluster: nixos-prod
+        environment: prod
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9001"
+
+    tailscale:
+      acceptRoutes: false
+      tags:
+        - "tag:k8s"
+        - "tag:k8s-ingress"
+        - "tag:nixos-prod"

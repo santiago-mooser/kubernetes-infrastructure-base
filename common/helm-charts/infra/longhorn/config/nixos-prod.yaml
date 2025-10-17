@@ -6,12 +6,13 @@ longhorn:
 
   ingress:
     enabled: true
-    ingressClassName: nginx-internal
+    ingressClassName: tailscale
     host: longhorn.${ARGOCD_ENV_DOMAIN}
     tls: true
     tlsSecret: wildcard-tls
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+      tailscale.com/hostname: "longhorn-nixos-prod"
+      tailscale.com/tags: "tag:k8s-ingress,tag:nixos-prod"
 
   longhornManager:
     resources:

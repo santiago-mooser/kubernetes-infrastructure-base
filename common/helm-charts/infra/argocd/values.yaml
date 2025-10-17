@@ -46,12 +46,10 @@ argo-cd:
       minReplicas: 3
     ingress:
       enabled: true
-      ingressClassName: nginx-internal
-      # Do not define tls certifcation, use default from nginx ingress
+      ingressClassName: tailscale  # Changed from nginx-internal
       annotations:
-        annotations.nginx.org/redirect-to-https: true
-        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        tailscale.com/hostname: "longhorn-nixos-prod"
+        tailscale.com/tags: "tag:k8s-ingress,tag:nixos-prod"
       hosts:
         - argocd.nixos.tech.santiago-mooser.com
     extraArgs:
