@@ -1,0 +1,120 @@
+argocd:
+  namespace: longhorn-system
+  releaseName: longhorn
+
+longhorn:
+  nameOverride: longhorn
+  fullnameOverride: longhorn
+
+  persistence:
+    defaultClass: true
+    defaultClassReplicaCount: 3
+    reclaimPolicy: Delete
+    defaultDataLocality: disabled
+
+  defaultSettings:
+    defaultReplicaCount: 3
+    guaranteedInstanceManagerCPU: 12
+    createDefaultDiskLabeledNodes: true
+    defaultDataPath: /var/lib/longhorn
+    defaultDataLocality: disabled
+    replicaSoftAntiAffinity: false
+    storageOverProvisioningPercentage: 200
+    storageMinimalAvailablePercentage: 25
+    upgradeChecker: true
+    defaultLonghornStaticStorageClass: longhorn-static
+    backupstorePollInterval: 300
+    taintToleration: ""
+    systemManagedComponentsNodeSelector: ""
+    priority-class: ""
+    autoSalvage: true
+    autoDeletePodWhenVolumeDetachedUnexpectedly: true
+    disableSchedulingOnCordonedNode: true
+    replicaZoneSoftAntiAffinity: true
+    volumeAttachmentRecoveryPolicy: wait
+    nodeDownPodDeletionPolicy: do-nothing
+    allowNodeDrainWithLastHealthyReplica: false
+    mkfsExt4Parameters: ""
+    disableReplicaRebuild: false
+    replicaReplenishmentWaitInterval: 600
+    concurrentReplicaRebuildPerNodeLimit: 5
+    disableRevisionCounter: true
+    systemManagedPodsImagePullPolicy: if-not-present
+    allowVolumeCreationWithDegradedAvailability: true
+    autoCleanupSystemGeneratedSnapshot: true
+    concurrentAutomaticEngineUpgradePerNodeLimit: 0
+    backingImageCleanupWaitInterval: 60
+    backingImageRecoveryWaitInterval: 300
+    guaranteedEngineManagerCPU: 12
+    guaranteedReplicaManagerCPU: 12
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx-internal
+    host: longhorn.${ARGOCD_ENV_DOMAIN}
+    tls: true
+    tlsSecret: wildcard-tls
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  longhornManager:
+    priorityClass: ~
+    tolerations: []
+    nodeSelector: {}
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  longhornDriver:
+    priorityClass: ~
+    tolerations: []
+    nodeSelector: {}
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  longhornUI:
+    priorityClass: ~
+    tolerations: []
+    nodeSelector: {}
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  metrics:
+    serviceMonitor:
+      enabled: false
+
+serviceMonitor:
+  enabled: true
+  labels:
+    prometheus: ${ARGOCD_ENV_CLUSTER}
+  interval: 30s
+  scrapeTimeout: 10s
+  relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_label_app]
+      action: replace
+      targetLabel: app
+    - sourceLabels: [__meta_kubernetes_namespace]
+      action: replace
+      targetLabel: namespace
