@@ -1,0 +1,40 @@
+argocd:
+  namespace: consul
+  releaseName: consul
+
+consul:
+  global:
+    name: consul
+    datacenter: nixos-prod
+
+  server:
+    enabled: true
+    replicas: 3
+
+    # Use Longhorn storage
+    storage: 10Gi
+    storageClass: longhorn
+
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+  client:
+    enabled: false
+
+  ui:
+    enabled: true
+    service:
+      type: ClusterIP
+
+  # Sync catalog is not needed for Vault backend
+  syncCatalog:
+    enabled: false
+
+  # Connect is not needed for Vault backend
+  connectInject:
+    enabled: false

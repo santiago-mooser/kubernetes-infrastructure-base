@@ -3,6 +3,10 @@
 
 # Available parameters and their default values for the Vault chart.
 
+argocd:
+  namespace: vault
+  releaseName: vault
+
 global:
   # enabled is the master enabled switch. Setting this to true or false
   # will enable or disable all the components within this chart by default.
@@ -388,7 +392,7 @@ server:
   # Configure the logging format for the Vault server.
   # Supported log formats include: standard, json
   logFormat: ""
-  
+
   # Resource requests, limits, etc. for the server cluster placement. This
   # should map directly to the value of the resources field for a PodSpec.
   # By default no direct resource request is made.
@@ -779,7 +783,7 @@ server:
     mountPath: "/vault/data"
     # Name of the storage class to use.  If null it will use the
     # configured default Storage Class.
-    storageClass: null
+    storageClass: longhorn
     # Access Mode of the storage device being used for the PVC
     accessMode: ReadWriteOnce
     # Annotations to apply to the PVC
@@ -832,7 +836,7 @@ server:
   # the "file" backend.  This mode is not highly available and should not be scaled
   # past a single replica.
   standalone:
-    enabled: "-"
+    enabled: false
 
     # config is a raw string of default configuration when using a Stateful
     # deployment. Default is to use a PersistentVolumeClaim mounted at /vault/data
@@ -881,7 +885,7 @@ server:
   # Helm project by default.  It is possible to manually configure Vault to use a
   # different HA backend.
   ha:
-    enabled: false
+    enabled: true
     replicas: 3
 
     # Set the api_addr configuration for Vault HA
@@ -1041,7 +1045,7 @@ ui:
   # serviceType can be used to control the type of service created. For
   # example, setting this to "LoadBalancer" will create an external load
   # balancer (for supported K8S installations) to access the UI.
-  enabled: false
+  enabled: true
   publishNotReadyAddresses: true
   # The service should only contain selectors for active Vault pod
   activeVaultPodOnly: false
@@ -1193,14 +1197,13 @@ csi:
     logFormat: standard
     logLevel: info
 
-    resources: {}
-    # resources:
-    #   requests:
-    #     memory: 256Mi
-    #     cpu: 250m
-    #   limits:
-    #     memory: 256Mi
-    #     cpu: 250m
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
 
     # Security context for the vault agent sidecar container
     securityContext:

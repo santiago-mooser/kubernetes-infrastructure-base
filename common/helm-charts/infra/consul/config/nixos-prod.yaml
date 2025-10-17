@@ -1,0 +1,23 @@
+consul:
+  global:
+    name: consul
+    datacenter: nixos-prod
+
+  server:
+    enabled: true
+    replicas: 3
+    storage: 10Gi
+    storageClass: longhorn
+
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 100m
+      limits:
+        memory: 512Mi
+        cpu: 500m
+
+  ui:
+    enabled: true
+    service:
+      type: ClusterIP
